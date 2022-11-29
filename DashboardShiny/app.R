@@ -14,20 +14,22 @@ library(shiny)
 library(shinydashboard)
 # Define UI for application that draws a histogram
 
-sales <- readr::read_csv("mental-health-compiled.csv")
-sales <- sales[c(
-  "TERRITORY", "ORDERDATE", "ORDERNUMBER", "PRODUCTCODE", "QUANTITYORDERED", "PRICEEACH"
-)]
+overview <- readr::read_csv("../MentalHealthTechIndustrySurvey/mental-health-in-tech-overview.csv")
 
+overview$Country
+
+overview$Age
+
+# Monta a UI
 ui <- dashboardPage(
   skin = "yellow",
   dashboardHeader(
-    title = "Saúde mental de dev" 
+    title = "Saúde mental" 
   ),
   dashboardSidebar(
     sidebarMenu(
-      selectInput("selectedLocalInput", "Local", choices = unique(sales$TERRITORY)),
-      sliderInput("peopleSlider", "Pessoas", min = 1, max = 1000, value = 270),
+      selectInput("selectedLocalInput", "Local", choices = unique(overview$Country)),
+      sliderInput("peopleSlider", "Granularidade da idade", min = min(overview$Age), max = max(overview$Age), value = 32),
       menuItem(
         "Dados",
         tabName = "dadousados",
@@ -49,7 +51,7 @@ ui <- dashboardPage(
     tabItems(
       tabItem(
         tabName = "dadousados", h2("Dados"),
-
+        
         tableOutput("tableLocal")
       ),
       tabItem(
@@ -57,13 +59,13 @@ ui <- dashboardPage(
         fluidRow(
           valueBox(
             uiOutput("peopleCard"),
-            subtitle = "Pessoas",
+            subtitle = "Granularidade selecionada",
             width = 4,
             icon = icon("person")
           )
         ),
         box(
-          title = "Histograma da saúde mental",
+          title = "Histograma da idade das pessoas",
           status = "warning",
           solidHeader = TRUE,
           collapsible = TRUE,
@@ -75,26 +77,27 @@ ui <- dashboardPage(
 )
 
 
+# Monta o servidor
 server <- function(input, output) {
   output$peopleCard <- renderText({
     prettyNum((input$peopleSlider))  
   })
   
   output$healthHist <- renderPlot({
-    hist(rnorm(input$peopleSlider))
+    hist(overview$Age,  breaks = input$peopleSlider, col = 'darkgray', border = 'white', main='Histograma idade dos partipantes de pesquisa', xlab='Idade', ylab='Frequencia')
   })
   
   selectedLocal <- reactive(
     if(input$selectedLocalInput == "NA") {
-      subset(sales, is.na(TERRITORY))
+      subset(overview, is.na(Country))
     } else {
-      subset(sales, TERRITORY == input$selectedLocalInput)
+      subset(overview, Country == input$selectedLocalInput)
     }
-    #sales[sales$TERRITORY == input$selectedLocalInput,]
+    #overview[overview$Country == input$selectedLocalInput,]
   )
   output$tableLocal <- renderTable(
     head(selectedLocal()),
-    10
+    15
   )
 }
 
