@@ -52,3 +52,27 @@ set.seed(64)
 answers <- read.csv("J:\\Code\\faculdade\\ICD6-ciencia-de-dados\\projeto-final\\MentalHealthInTechIndustry\\MentalHealthTechIndustrySurvey\\Surveys\\mental-health-answers.csv", na.string="", stringsAsFactors=F)
 questions <- read.csv("J:\\Code\\faculdade\\ICD6-ciencia-de-dados\\projeto-final\\MentalHealthInTechIndustry\\MentalHealthTechIndustrySurvey\\Surveys\\mental-health-question.csv",  na.string="", stringsAsFactors=F)
 survey <- read.csv("J:\\Code\\faculdade\\ICD6-ciencia-de-dados\\projeto-final\\MentalHealthInTechIndustry\\MentalHealthTechIndustrySurvey\\Surveys\\mental-health-survey.csv", na.string="", stringsAsFactors=F)
+
+### Checando se existem valores NA - com a execução constatado que não há
+
+sapply(answers, function(x) sum(is.na(x)))
+sapply(questions, function(x) sum(is.na(x)))
+sapply(survey, function(x) sum(is.na(x)))
+
+### Obtaining head and summary of data
+
+head(answers)
+head(questions)
+head(survey)
+
+summary(answers)
+# Data of interest in answers:
+# 4218 of total participants in surveys through years
+
+summary(questions)
+# Data of interest in questions:
+# Surveys with 118 questions each 
+
+summary(survey)
+# Data of interest in survey:
+# 2015 has no data
