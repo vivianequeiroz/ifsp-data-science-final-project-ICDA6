@@ -87,6 +87,7 @@ head(mentalHealthExpenditureSuicideRatesYearsOfInterest)
 summary(mentalHealthExpenditureSuicideRatesYearsOfInterest$HExp_Pctage_Y)
 summary(mentalHealthExpenditureSuicideRatesYearsOfInterest$Dep_Num_2015)
 summary(mentalHealthExpenditureSuicideRatesYearsOfInterest$MHExp_Pctage_2011)
+summary(mentalHealthExpenditureSuicideRatesYearsOfInterest$Deaths_Suicides)
 
 #Statistical analysis
 mentalHealthExpenditureSuicideRatesYearsOfInterest %>%
@@ -99,12 +100,7 @@ correlationTable <- mentalHealthExpenditureSuicideRates %>%
 
 correlationTable    # print
 
-
-head(mentalHealthExpenditureSuicideRatesYearsOfInterest)
-str(mentalHealthExpenditureSuicideRatesYearsOfInterest)
-
-correlations <- cor(mentalHealthExpenditureSuicideRatesYearsOfInterest %>% 
-                      select(Deaths_Suicides, MHExp_Pctage_2011, Suicide_p100)[,1:8])
+correlations <- cor(mentalHealthExpenditureSuicideRatesYearsOfInterest[,3:8])
 corrplot(correlations, method="circle")
 
 
@@ -115,10 +111,13 @@ for(i in 3:8) {
   hist(mentalHealthExpenditureSuicideRatesYearsOfInterest[,i], main=names(mentalHealthExpenditureSuicideRatesYearsOfInterest)[i])
 }
 
-correlations <- cor(mentalHealthExpenditureSuicideRatesYearsOfInterest[,3:8])
+
+correlations <- cor(mentalHealthExpenditureSuicideRatesYearsOfInterest %>% 
+                      select(Population, Deaths_Suicides, MHExp_Pctage_2011, Suicide_p100))
 corrplot(correlations, method="circle")
 
 str(mentalHealthExpenditureSuicideRatesYearsOfInterest)
+head(mentalHealthExpenditureSuicideRatesYearsOfInterest)
 
 train <- mentalHealthExpenditureSuicideRatesYearsOfInterest %>% 
   dplyr::sample_frac(0.70)

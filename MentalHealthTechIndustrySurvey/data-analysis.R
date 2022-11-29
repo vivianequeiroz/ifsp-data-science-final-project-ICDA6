@@ -463,7 +463,7 @@ table(familyMentalHealthHistory$AnswerText)
 find_mode(familyMentalHealthHistory$AnswerText)
 calculate_mode_without_na(familyMentalHealthHistory$AnswerText)
 
-familyMentalHealthHistory$AnswerText <- gsub("(?i)I don't know|(?i)Yes", "Yes", familyMentalHealthHistory$AnswerText)
+#familyMentalHealthHistory$AnswerText <- gsub("(?i)I don't know|(?i)Yes", "Yes", familyMentalHealthHistory$AnswerText)
 
 
 #Accounting total per answers in variable
@@ -487,6 +487,8 @@ familyMentalHealthHistory %>%
 
 #Answers plot 
 barplot(table(familyMentalHealthHistory$AnswerText), main="Histórico familiar de alguma questão relacionada a saúde mental")
+
+
 
 
 #Frequency with exact numbers:
@@ -912,115 +914,18 @@ summary(searchForMentalProfessionalHealthDfUnique)
 
 #Commit 15
 
-
-#Should point to a convenient directory at other personal computer
-write.csv(mentalHealthInTechOverview,"J:\\Code\\faculdade\\ICD6-ciencia-de-dados\\projeto-final\\MentalHealthInTechIndustry\\MentalHealthTechIndustrySurvey\\mental-health-in-tech-overview.csv", row.names = FALSE)
-
-mentalHealthInTechOverview <- read.csv("J:\\Code\\faculdade\\ICD6-ciencia-de-dados\\projeto-final\\MentalHealthInTechIndustry\\MentalHealthTechIndustrySurvey\\mental-health-in-tech-overview.csv", na.string="", stringsAsFactors=T)
+22
 
 
-sapply(mentalHealthInTechOverview, function(x) sum(is.na(x)))
 
-print(nrow(mentalHealthInTechOverview))
-#Output: 2958 dados para treino e validação teste 
-
-head(mentalHealthInTechOverview)
-
-
-# 
-# trainData <- mentalHealthInTechOverview[1:2070,]
-# testData <- data.frame(mentalHealthInTechOverview[2071:2958,])
-
-
-#newTestData <-testData                                # Duplicate test data set
-#newTestData$Country[which(!(testData$Country %in% unique(trainData$Country)))] <- NA  # Replace new levels by NA
-#newTestData
-
-
-#Fixing
-# rec <- 
-#   recipe(AlreadySeekMentalHealthAssistance ~ ., data = trainData) %>% 
-#   step_other(Country) %>% # This is where we handle new categories
-#   prep()
-# 
-# new_train <- bake(rec, new_data = trainData)
-# new_test  <- bake(rec, new_data = testData)
-# 
-# # We build the model again with the prepared data
-# model <- rpart(
-#   formula = AlreadySeekMentalHealthAssistance ~ .,
-#   data = new_train
-# )
-
-# This works
-# predict(model, newdata = new_test)
-# 
-# model <- glm(AlreadySeekMentalHealthAssistance ~.,family=binomial,data=new_train)
-# 
-# summary(model)
-# 
-# anova(model, test="Chisq")
-# 
-# pR2(model)
-# 
-# fittedResult <- predict(model,newdata=data.frame(new_test),type='response')
-# fittedResult <- ifelse(fittedResult > 0.5,1,0)
-# 
-# misClasificError <- mean(fittedResult != new_test$AlreadySeekMentalHealthAssistance)
-# print(paste('Accuracy',1-misClasificError))
-# 
-# 
-# head(mentalHealthInTechOverview)
-# 
-# 
-
-sample <- sample(c(TRUE, FALSE), nrow(mentalHealthInTechOverview), replace=TRUE, prob=c(0.7,0.3))
-train <- mentalHealthInTechOverview[sample, ]
-test <- mentalHealthInTechOverview[!sample, ]
-
-# train <- mentalHealthInTechOverview %>% 
-#  dplyr::sample_frac(0.70)
-# 
-# test  <- dplyr::anti_join(mentalHealthInTechOverview, train, by = 'UserID')
-
-#Training with 70% of data
-
-trainingModel <-  glm(AlreadySeekMentalHealthAssistance ~ Sex + Age + MentalHealthHistory + TalkAboutMentalHealthAtInterview + HasMentalHealthDisorder + Country, data = train, family = binomial(link="logit"))
-summary(trainingModel)
-
-glm.probs <- predict(trainingModel,type = "response")
-glm.probs[1:10]
-
-glm.pred.traning <- ifelse(glm.probs > 0.5, "Yes", "No")
-glm.pred.traning
-
-attach(train)
-table(glm.pred.traning, train$AlreadySeekMentalHealthAssistance)
-
-mean(glm.pred.traning == train$AlreadySeekMentalHealthAssistance)
-
-
-#Testing with 30% of data
-
-model <- glm(AlreadySeekMentalHealthAssistance ~ Sex + Age + MentalHealthHistory + TalkAboutMentalHealthAtInterview + HasMentalHealthDisorder + Country, data = test, family = binomial(link="logit"))
-summary(model)
-
-
-glm.probs <- predict(model,type = "response")
-glm.probs[1:10]
-summary(model)
-
-glm.pred.test <- ifelse(glm.probs > 0.5, "Yes", "No")
-
-attach(model)
-table(glm.pred.test, test$AlreadySeekMentalHealthAssistance)
-
-mean(glm.pred.test == test$AlreadySeekMentalHealthAssistance)
+cfm <- as_tibble(confusionMatrixTable, x = "Matriz de confusão")
 
 #Checking for multicollinearity
 
 vif(model)
 vif(trainingModel)
+
+anova(model, test = "Chisq")
 
 #UserID   and Survey Year are > 5, should not be considered 
 
@@ -1032,6 +937,62 @@ plot(allEffects(trainingModel))
 test_roc = roc(test$AlreadySeekMentalHealthAssistance ~ glm.probs, plot = TRUE, print.auc = TRUE)
 
 as.numeric(test_roc$auc)
+
+#ODDS RATIOS
+logitor(HasMentalHealthDisorder ~ AlreadySeekMentalHealthAssistance,data = test)
+logitor(MentalHealthHistory ~ AlreadySeekMentalHealthAssistance,data = test)
+logitor(Country ~ AlreadySeekMentalHealthAssistance,data = test)
+logitor(Sex ~ AlreadySeekMentalHealthAssistance,data = test)
+logitor(TalkAboutMentalHealthAtInterview ~ AlreadySeekMentalHealthAssistance,data = test)
+
+#Confidence interval
+
+coef(model)
+
+logit2prob <- function(logit){
+  odds <- exp(logit)
+  prob <- odds / (1 + odds)
+  return(prob)
+}
+
+logit2prob(coef(model))
+
+
+
+
+pred=data.frame(Sex="Male",
+                MentalHealthHistory="Yes",
+                Age=32,
+                Country="Brazil",
+                HasMentalHealthDisorder="Yes",
+                TalkAboutMentalHealthAtInterview="No",
+                AlreadySeekMentalHealthAssistance=factor(1)
+)
+pred$prob=predict(model, newdata=pred, type="response")
+pred
+
+pred=data.frame(Sex="Male",
+                MentalHealthHistory="Yes",
+                Age=50,
+                Country="United States of America",
+                HasMentalHealthDisorder="No",
+                TalkAboutMentalHealthAtInterview="Yes",
+                AlreadySeekMentalHealthAssistance=factor(1)
+)
+pred$prob=predict(model, newdata=pred, type="response")
+pred
+
+pred=data.frame(Sex="Female",
+                MentalHealthHistory="Yes",
+                Age=50,
+                Country="Canada",
+                HasMentalHealthDisorder="No",
+                TalkAboutMentalHealthAtInterview="No",
+                AlreadySeekMentalHealthAssistance=factor(1)
+)
+pred$prob=predict(model, newdata=pred, type="response")
+pred
+
 
 #############
 
